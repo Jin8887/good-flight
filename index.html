@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Good Flight ✈️</title>
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700&family=Gowun+Batang&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+:root { --paper:#fef9ec; --ink:#2c1810; }
+body { font-family:'Nanum Myeongjo',serif; background:#0a1628; min-height:100vh; overflow:hidden; }
+
+.screen { position:fixed; inset:0; display:none; align-items:center; justify-content:center; flex-direction:column; }
+.screen.active { display:flex; }
+
+/* ===== SCREEN 1: INPUT ===== */
+#screen-input { background:linear-gradient(to bottom,#0a1628 0%,#1a3a6b 55%,#f4a460 85%,#e8783a 100%); }
+.stars-layer { position:absolute; inset:0; pointer-events:none; }
+.star { position:absolute; background:white; border-radius:50%; animation:twinkle 2s infinite alternate; }
+@keyframes twinkle { from{opacity:0.2} to{opacity:1} }
+.input-wrap { position:relative; z-index:10; width:90%; max-width:480px; text-align:center; }
+.main-title { font-family:'Gowun Batang',serif; color:#fff; font-size:2.2rem; letter-spacing:0.12em; text-shadow:0 2px 20px rgba(0,0,0,0.5); margin-bottom:6px; }
+.main-sub { color:rgba(255,255,255,0.55); font-size:0.85rem; margin-bottom:28px; letter-spacing:0.06em; }
+.card { background:rgba(255,255,255,0.08); backdrop-filter:blur(14px); border:1px solid rgba(255,255,255,0.14); border-radius:22px; padding:30px 34px; box-shadow:0 8px 40px rgba(0,0,0,0.35); }
+.lbl { color:rgba(255,255,255,0.75); font-size:0.82rem; text-align:left; margin-bottom:8px; letter-spacing:0.06em; }
+.inp { width:100%; padding:12px 16px; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); border-radius:10px; color:#fff; font-family:'Nanum Myeongjo',serif; font-size:1rem; margin-bottom:18px; outline:none; transition:border-color 0.2s; }
+.inp::placeholder { color:rgba(255,255,255,0.3); }
+.inp:focus { border-color:rgba(255,200,100,0.6); }
+textarea.inp { height:110px; resize:none; line-height:1.65; }
+select.inp { cursor:pointer; appearance:none; -webkit-appearance:none; }
+select.inp option { background:#1a3a6b; color:#fff; }
+.send-btn { width:100%; padding:15px; background:linear-gradient(135deg,#f4a460,#e8783a); border:none; border-radius:12px; color:#fff; font-family:'Gowun Batang',serif; font-size:1.05rem; letter-spacing:0.1em; cursor:pointer; box-shadow:0 4px 20px rgba(232,120,58,0.4); transition:transform 0.2s,box-shadow 0.2s; }
+.send-btn:hover { transform:translateY(-2px); box-shadow:0 6px 28px rgba(232,120,58,0.55); }
+.send-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+
+/* ===== SCREEN 2: BOARDING ===== */
+#screen-boarding { background:linear-gradient(to bottom,#0e1a2b 0%,#1c2e4a 40%,#2d4a6e 70%,#e8783a 100%); flex-direction:row; align-items:stretch; }
+.gate-side { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; border-right:2px dashed rgba(255,255,255,0.15); padding:40px 20px; overflow:hidden; }
+.gate-sign { background:rgba(255,200,80,0.15); border:1.5px solid rgba(255,200,80,0.4); border-radius:10px; padding:10px 24px; color:#ffd580; font-family:'Gowun Batang',serif; font-size:0.9rem; letter-spacing:0.12em; margin-bottom:30px; text-align:center; }
+.gate-number { font-size:2rem; font-weight:700; display:block; }
+.person-stage { width:200px; height:320px; position:relative; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; }
+.avatar-svg { width:160px; height:290px; filter:drop-shadow(0 10px 24px rgba(0,0,0,0.45)); animation:idle 2.2s ease-in-out infinite alternate; }
+@keyframes idle { from{transform:translateY(0)} to{transform:translateY(-8px)} }
+.person-name-tag { background:#fff; color:#1a2a3a; font-family:'Gowun Batang',serif; font-size:1rem; font-weight:700; padding:7px 20px; border-radius:50px; white-space:nowrap; box-shadow:0 4px 14px rgba(0,0,0,0.3); letter-spacing:0.08em; margin-top:12px; }
+
+.plane-side { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 20px; }
+.boarding-instruction { color:rgba(255,255,255,0.65); font-size:0.9rem; letter-spacing:0.08em; margin-bottom:18px; }
+.plane-entrance { position:relative; display:flex; align-items:center; justify-content:center; }
+.plane-big { font-size:10rem; line-height:1; filter:drop-shadow(0 8px 24px rgba(0,0,0,0.4)); animation:planeWait 1.8s ease-in-out infinite alternate; }
+@keyframes planeWait { from{transform:translateY(0) rotate(0deg)} to{transform:translateY(-10px) rotate(1.5deg)} }
+.boarding-arrow { position:absolute; left:-55px; top:50%; transform:translateY(-50%); display:flex; gap:7px; align-items:center; }
+.arrow-dot { width:9px; height:9px; background:rgba(255,200,80,0.8); border-radius:50%; animation:arrowPulse 0.7s infinite alternate; }
+.arrow-dot:nth-child(2){animation-delay:0.15s} .arrow-dot:nth-child(3){animation-delay:0.3s}
+@keyframes arrowPulse { from{opacity:0.2;transform:scale(0.7)} to{opacity:1;transform:scale(1.3)} }
+.board-btn { margin-top:32px; padding:14px 40px; background:linear-gradient(135deg,#f4a460,#e8783a); border:none; border-radius:50px; color:#fff; font-family:'Gowun Batang',serif; font-size:1.05rem; letter-spacing:0.12em; cursor:pointer; box-shadow:0 4px 20px rgba(232,120,58,0.45); transition:transform 0.2s; }
+.board-btn:hover { transform:translateY(-2px); }
+.board-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+
+/* ===== SCREEN 3: FLIGHT ===== */
+#screen-flight { background:linear-gradient(to bottom,#0a1628 0%,#1a3a6b 40%,#4a7fb5 70%,#f4a460 88%,#e8783a 100%); position:relative; overflow:hidden; }
+.ground { position:absolute; bottom:0; width:100%; height:70px; background:linear-gradient(to bottom,#4a7c59,#2d5a27); z-index:2; }
+.ground::before { content:''; position:absolute; top:-15px; left:0; width:100%; height:25px; background:radial-gradient(ellipse 60px 16px at center,#5a9c69,transparent); background-size:70px 25px; background-repeat:repeat-x; }
+.runway { position:absolute; bottom:55px; left:50%; transform:translateX(-50%); width:240px; height:16px; background:#666; border-radius:3px; z-index:3; display:flex; align-items:center; justify-content:space-evenly; padding:0 10px; }
+.runway-mark { width:24px; height:4px; background:#fff; border-radius:2px; }
+.fcloud { position:absolute; background:rgba(255,255,255,0.8); border-radius:50px; pointer-events:none; z-index:4; }
+.fcloud::before,.fcloud::after { content:''; position:absolute; background:rgba(255,255,255,0.8); border-radius:50%; }
+
+#fly-plane { position:fixed; z-index:50; pointer-events:none; display:flex; flex-direction:column; align-items:center; }
+.fly-plane-emoji { font-size:13rem; line-height:1; filter:drop-shadow(0 10px 30px rgba(0,0,0,0.5)); }
+.fly-person-badge { background:#fff; border-radius:50px; padding:6px 18px 6px 10px; display:flex; align-items:center; gap:8px; box-shadow:0 4px 14px rgba(0,0,0,0.3); margin-top:-16px; font-size:0.95rem; font-family:'Gowun Batang',serif; color:#1a2a3a; font-weight:700; white-space:nowrap; }
+.fly-person-mini { width:34px; height:34px; }
+.trail-dot { position:fixed; border-radius:50%; pointer-events:none; animation:trailFade 2.5s forwards; z-index:49; }
+@keyframes trailFade { 0%{opacity:0.85;transform:scale(1)} 30%{opacity:0.6} 100%{opacity:0;transform:scale(6)} }
+
+/* ===== FALLING LETTER ANIMATION ===== */
+#falling-letter {
+  position:fixed;
+  z-index:150;
+  pointer-events:none;
+  display:none;
+  width:90px;
+  height:70px;
+  filter:drop-shadow(0 4px 12px rgba(0,0,0,0.35));
+}
+#falling-letter svg { width:100%; height:100%; }
+
+@keyframes letterLand {
+  0%   { opacity:0; transform:translateY(-80px) rotate(-8deg) scale(0.7); }
+  60%  { opacity:1; transform:translateY(4px) rotate(2deg) scale(1.04); }
+  80%  { transform:translateY(-3px) rotate(-1deg) scale(0.98); }
+  100% { transform:translateY(0) rotate(0deg) scale(1); opacity:1; }
+}
+
+/* ===== LETTER ===== */
+#letter-wrap { position:fixed; inset:0; z-index:100; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.45); backdrop-filter:blur(4px); }
+.letter-card { background:var(--paper); border-radius:14px; width:min(500px,90vw); padding:38px 40px; box-shadow:0 20px 60px rgba(0,0,0,0.5); position:relative; font-family:'Nanum Myeongjo',serif; animation:letterDrop 0.8s cubic-bezier(0.34,1.56,0.64,1) forwards; transform:translateY(-60px); opacity:0; }
+@keyframes letterDrop { from{transform:translateY(-80px) rotate(-3deg);opacity:0} to{transform:translateY(0) rotate(0deg);opacity:1} }
+.letter-stamp { position:absolute; top:20px; right:20px; width:54px; height:54px; border:2px solid #c8a87a; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:1.7rem; }
+.letter-from { font-size:0.75rem; color:#b08a6a; letter-spacing:0.15em; margin-bottom:6px; font-family:'Gowun Batang',serif; }
+.letter-to { font-size:1.1rem; color:#2c1810; font-weight:700; margin-bottom:22px; padding-bottom:14px; border-bottom:1.5px solid #e8d5b7; font-family:'Gowun Batang',serif; }
+.letter-body { font-size:1.05rem; color:#2c1810; line-height:2.1; word-break:keep-all; margin-bottom:22px; }
+.letter-sign { text-align:right; font-size:0.85rem; color:#b08a6a; font-style:italic; padding-top:12px; border-top:1px dashed #e8d5b7; }
+.letter-close-btn { margin-top:24px; width:100%; padding:14px; background:linear-gradient(135deg,#1a3a6b,#0a1628); border:none; border-radius:10px; color:#fff; font-family:'Gowun Batang',serif; font-size:0.95rem; letter-spacing:0.1em; cursor:pointer; pointer-events:all; }
+
+/* ===== LOADING ===== */
+#loading { position:fixed; inset:0; z-index:200; background:rgba(10,22,40,0.88); display:none; align-items:center; justify-content:center; flex-direction:column; gap:18px; }
+#loading.show { display:flex; }
+.loading-plane { font-size:4rem; animation:loadBounce 0.9s infinite alternate; }
+@keyframes loadBounce { from{transform:translateY(0) rotate(-5deg)} to{transform:translateY(-22px) rotate(5deg)} }
+.loading-text { color:rgba(255,255,255,0.8); font-family:'Gowun Batang',serif; font-size:1rem; letter-spacing:0.18em; }
+
+/* ===== RESET ===== */
+#reset-btn { display:none; position:fixed; bottom:28px; left:50%; transform:translateX(-50%); z-index:150; padding:13px 34px; background:rgba(255,255,255,0.14); backdrop-filter:blur(10px); border:1.5px solid rgba(255,255,255,0.25); border-radius:50px; color:#fff; font-family:'Gowun Batang',serif; font-size:0.95rem; cursor:pointer; letter-spacing:0.1em; }
+#reset-btn:hover { background:rgba(255,255,255,0.22); }
+
+/* ===== NOTIF ===== */
+#notif { position:fixed; top:24px; left:50%; transform:translateX(-50%) translateY(-80px); background:rgba(255,255,255,0.95); color:#1a2a3a; padding:12px 26px; border-radius:50px; font-size:0.9rem; z-index:300; box-shadow:0 4px 20px rgba(0,0,0,0.2); transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1); white-space:nowrap; font-family:'Nanum Myeongjo',serif; }
+#notif.show { transform:translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- SCREEN 1: INPUT -->
+<div class="screen active" id="screen-input">
+  <div class="stars-layer" id="stars"></div>
+  <div class="input-wrap">
+    <div class="main-title">✈️ Good Flight</div>
+    <div class="main-sub">그 사람을 멀리 보내드립니다</div>
+    <div class="card">
+      <div class="lbl">누구를 보낼까요?</div>
+      <input class="inp" id="person-name" type="text" placeholder="이름 또는 별명" maxlength="20">
+      <div class="lbl">나와 어떤 관계인가요?</div>
+      <select class="inp" id="relation">
+        <option value="">선택해주세요</option>
+        <option value="직속 상사">직속 상사</option>
+        <option value="직속 부하직원">직속 부하직원</option>
+        <option value="같은 팀 동료">같은 팀 동료</option>
+        <option value="타 부서 동료">타 부서 동료</option>
+        <option value="거래처 / 클라이언트">거래처 / 클라이언트</option>
+        <option value="배우자 / 파트너">배우자 / 파트너</option>
+        <option value="가족">가족</option>
+        <option value="친구">친구</option>
+        <option value="지인">지인</option>
+      </select>
+      <div class="lbl">그 사람의 어떤 점이 싫으신가요?</div>
+      <textarea class="inp" id="complaint" placeholder="솔직하게 적어보세요&#10;예) 항상 말을 끊고 자기 얘기만 해&#10;    약속을 잘 안 지켜"></textarea>
+      <button class="send-btn" id="send-btn" onclick="handleSend()">✈️ 보내기</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 2: BOARDING -->
+<div class="screen" id="screen-boarding">
+  <div class="gate-side">
+    <div class="gate-sign">
+      출발 게이트<span class="gate-number">G8</span>
+    </div>
+    <div class="person-stage">
+      <!-- B&W back-view avatar, gender-neutral short hair -->
+      <svg class="avatar-svg" viewBox="0 0 120 250" xmlns="http://www.w3.org/2000/svg">
+        <!-- Shadow -->
+        <ellipse cx="60" cy="246" rx="30" ry="6" fill="rgba(255,255,255,0.12)"/>
+        <!-- Shoes -->
+        <ellipse cx="44" cy="236" rx="14" ry="7" fill="#111"/>
+        <ellipse cx="76" cy="236" rx="14" ry="7" fill="#111"/>
+        <rect x="33" y="228" width="22" height="10" rx="4" fill="#222"/>
+        <rect x="65" y="228" width="22" height="10" rx="4" fill="#222"/>
+        <!-- Pants -->
+        <rect x="30" y="158" width="24" height="72" rx="9" fill="#444"/>
+        <rect x="66" y="158" width="24" height="72" rx="9" fill="#444"/>
+        <line x1="42" y1="162" x2="42" y2="228" stroke="#333" stroke-width="1.5"/>
+        <line x1="78" y1="162" x2="78" y2="228" stroke="#333" stroke-width="1.5"/>
+        <!-- Belt -->
+        <rect x="28" y="153" width="64" height="8" rx="3" fill="#111"/>
+        <rect x="54" y="154" width="12" height="6" rx="1.5" fill="#888"/>
+        <!-- Jacket body -->
+        <rect x="24" y="80" width="72" height="76" rx="14" fill="#555"/>
+        <!-- Jacket back seam -->
+        <line x1="60" y1="83" x2="60" y2="156" stroke="#3a3a3a" stroke-width="2"/>
+        <path d="M24 112 Q60 120 96 112" stroke="#3a3a3a" stroke-width="1.5" fill="none"/>
+        <!-- Arms -->
+        <rect x="2" y="84" width="24" height="62" rx="12" fill="#555"/>
+        <rect x="94" y="84" width="24" height="62" rx="12" fill="#555"/>
+        <!-- Hands -->
+        <ellipse cx="14" cy="150" rx="11" ry="8" fill="#ccc"/>
+        <ellipse cx="106" cy="150" rx="11" ry="8" fill="#ccc"/>
+        <!-- Neck -->
+        <rect x="50" y="62" width="20" height="20" rx="6" fill="#ccc"/>
+        <!-- Head -->
+        <circle cx="60" cy="40" r="28" fill="#ccc" stroke="#aaa" stroke-width="1"/>
+        <!-- Short neat hair - back of head, gender-neutral -->
+        <!-- Main hair cap covering top and back -->
+        <ellipse cx="60" cy="26" rx="28" ry="16" fill="#333"/>
+        <ellipse cx="60" cy="38" rx="28" ry="18" fill="#333"/>
+        <!-- Hair tapers at nape, clean cut -->
+        <path d="M35 46 Q38 58 42 62 Q60 66 78 62 Q82 58 85 46" fill="#333"/>
+        <!-- Side hair fade lines -->
+        <path d="M33 36 Q34 44 36 50" stroke="#555" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path d="M87 36 Q86 44 84 50" stroke="#555" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <!-- NAME BADGE on jacket -->
+        <rect x="34" y="92" width="52" height="32" rx="5" fill="white" stroke="#ddd" stroke-width="1"/>
+        <line x1="34" y1="104" x2="86" y2="104" stroke="#eee" stroke-width="1"/>
+        <text id="badge-label-line1" x="60" y="101" text-anchor="middle" font-size="7.5" fill="#888" font-family="sans-serif">별명</text>
+        <text id="badge-label-line2" x="60" y="118" text-anchor="middle" font-size="9" fill="#222" font-weight="bold" font-family="sans-serif">-</text>
+      </svg>
+      <div class="person-name-tag" id="boarding-name">이름</div>
+    </div>
+  </div>
+
+  <div class="plane-side">
+    <div class="boarding-instruction">✈ 탑승 준비가 완료되었습니다</div>
+    <div class="plane-entrance">
+      <div class="boarding-arrow">
+        <div class="arrow-dot"></div>
+        <div class="arrow-dot"></div>
+        <div class="arrow-dot"></div>
+      </div>
+      <div class="plane-big">✈️</div>
+    </div>
+    <button class="board-btn" id="board-btn" onclick="startBoarding()">탑승 →</button>
+  </div>
+</div>
+
+<!-- SCREEN 3: FLIGHT -->
+<div class="screen" id="screen-flight">
+  <div class="ground"></div>
+  <div class="runway">
+    <div class="runway-mark"></div><div class="runway-mark"></div>
+    <div class="runway-mark"></div><div class="runway-mark"></div>
+    <div class="runway-mark"></div>
+  </div>
+  <div id="flight-clouds"></div>
+  <div id="fly-plane">
+    <div class="fly-plane-emoji">✈️</div>
+    <div class="fly-person-badge">
+      <!-- Mini avatar in badge -->
+      <svg class="fly-person-mini" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="40" cy="16" r="12" fill="#4a6fa5"/>
+        <rect x="26" y="30" width="28" height="28" rx="8" fill="#4a6fa5"/>
+        <rect x="12" y="32" width="14" height="8" rx="4" fill="#4a6fa5"/>
+        <rect x="10" y="38" width="8" height="20" rx="4" fill="#4a6fa5"/>
+        <rect x="54" y="32" width="14" height="8" rx="4" fill="#4a6fa5"/>
+        <rect x="62" y="38" width="8" height="20" rx="4" fill="#4a6fa5"/>
+        <rect x="28" y="56" width="10" height="24" rx="5" fill="#4a6fa5"/>
+        <rect x="42" y="56" width="10" height="24" rx="5" fill="#4a6fa5"/>
+      </svg>
+      <span id="fly-name-tag">이름</span>
+    </div>
+  </div>
+</div>
+
+<!-- LETTER -->
+<div id="letter-wrap">
+  <div class="letter-card">
+    <div class="letter-stamp">✉️</div>
+    <div class="letter-from">✈ 하늘 위 7,000m에서</div>
+    <div class="letter-to" id="letter-to">머물다 간 자리...</div>
+    <div class="letter-body" id="letter-body">...</div>
+    <div class="letter-sign" id="letter-sign">— OOO을 보낸 미래에서</div>
+    <button class="letter-close-btn" onclick="resetAll()">↩ 다시 보내기</button>
+  </div>
+</div>
+
+<!-- FALLING LETTER (animation before letter reveal) -->
+<div id="falling-letter">
+  <svg viewBox="0 0 90 70" xmlns="http://www.w3.org/2000/svg">
+    <!-- Envelope body -->
+    <rect x="2" y="12" width="86" height="56" rx="6" fill="#fef9ec" stroke="#d4b896" stroke-width="2"/>
+    <!-- Envelope flap (open, folded down) -->
+    <path d="M2 12 L45 42 L88 12 Z" fill="#f4e8d0" stroke="#d4b896" stroke-width="1.5" stroke-linejoin="round"/>
+    <!-- Envelope bottom fold lines -->
+    <path d="M2 68 L28 42" stroke="#d4b896" stroke-width="1.2"/>
+    <path d="M88 68 L62 42" stroke="#d4b896" stroke-width="1.2"/>
+    <!-- Letter sticking out top -->
+    <rect x="22" y="2" width="46" height="30" rx="3" fill="white" stroke="#e0cdb0" stroke-width="1.2"/>
+    <line x1="30" y1="12" x2="60" y2="12" stroke="#ccc" stroke-width="1.2"/>
+    <line x1="30" y1="18" x2="60" y2="18" stroke="#ccc" stroke-width="1.2"/>
+    <line x1="30" y1="24" x2="50" y2="24" stroke="#ccc" stroke-width="1.2"/>
+  </svg>
+</div>
+
+<!-- LOADING -->
+<div id="loading">
+  <div class="loading-plane">✈️</div>
+  <div class="loading-text">탑승 수속 중....</div>
+</div>
+
+<div id="notif"></div>
+
+<script>
+// Stars
+const starsEl = document.getElementById('stars');
+for (let i = 0; i < 70; i++) {
+  const s = document.createElement('div');
+  s.className = 'star';
+  const sz = Math.random() * 2.5 + 0.5;
+  s.style.cssText = `width:${sz}px;height:${sz}px;top:${Math.random()*70}%;left:${Math.random()*100}%;animation-delay:${Math.random()*3}s;animation-duration:${1.5+Math.random()*2}s;`;
+  starsEl.appendChild(s);
+}
+
+let personName = '', complaintText = '', letterText = '', nicknameText = '', relationText = '';
+let exhaustTimer = null;
+
+function showNotif(msg, dur=3000) {
+  const n = document.getElementById('notif');
+  n.textContent = msg;
+  n.classList.add('show');
+  clearTimeout(n._t);
+  n._t = setTimeout(() => n.classList.remove('show'), dur);
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// STEP 1: SEND
+async function handleSend() {
+  personName = document.getElementById('person-name').value.trim() || '그 사람';
+  relationText = document.getElementById('relation').value;
+  complaintText = document.getElementById('complaint').value.trim();
+  if (!relationText) { showNotif('관계를 선택해주세요 👆'); return; }
+  if (!complaintText) { showNotif('싫은 점을 먼저 적어주세요 ✏️'); return; }
+
+  document.getElementById('send-btn').disabled = true;
+  document.getElementById('loading').classList.add('show');
+
+  try {
+    const results = await Promise.all([
+      generateNickname(personName, relationText, complaintText),
+      generateLetter(personName, relationText, complaintText)
+    ]);
+    nicknameText = results[0];
+    letterText = results[1];
+  } catch(e) {
+    nicknameText = '미지의 존재';
+    letterText = `돌아보면, ${personName}의 그 면이 가장 필요했던 순간들이 분명 있었어요.\n그게 그 사람만의 방식이었고, 그 자리는 생각보다 컸을지도 모릅니다.`;
+  }
+
+  document.getElementById('loading').classList.remove('show');
+
+  // Set badge nickname on avatar (split into 2 lines if long)
+  const badgeLine1 = document.getElementById('badge-label-line1');
+  const badgeLine2 = document.getElementById('badge-label-line2');
+  badgeLine1.textContent = '별명';
+  if (nicknameText.length <= 8) {
+    badgeLine2.textContent = nicknameText;
+    badgeLine2.setAttribute('font-size', '9');
+  } else {
+    // split roughly in half
+    const mid = Math.ceil(nicknameText.length / 2);
+    badgeLine2.textContent = nicknameText.slice(0, mid) + '…';
+    badgeLine2.setAttribute('font-size', '8');
+  }
+
+  document.getElementById('boarding-name').textContent = personName;
+  document.getElementById('fly-name-tag').textContent = nicknameText;  // 별명 표시
+  document.getElementById('letter-to').textContent = `${personName}이(가) 머물다 간 자리...`;
+  document.getElementById('letter-body').textContent = letterText;
+  document.getElementById('letter-sign').textContent = `— ${personName}을(를) 보낸 미래에서`;
+  showScreen('screen-boarding');
+}
+
+// STEP 2: BOARDING
+function startBoarding() {
+  const btn = document.getElementById('board-btn');
+  btn.disabled = true;
+
+  // Avatar slides to plane
+  const avatarSvg = document.querySelector('.avatar-svg');
+  const nameTag = document.querySelector('.person-name-tag');
+  avatarSvg.style.transition = 'transform 0.9s cubic-bezier(0.4,0,0.8,1), opacity 0.7s ease';
+  nameTag.style.transition = 'opacity 0.5s ease';
+  avatarSvg.style.transform = 'translateX(220px) translateY(10px) scale(0.6)';
+  avatarSvg.style.opacity = '0';
+  nameTag.style.opacity = '0';
+
+  showNotif(`잘 가라... 멀리 가... 👋`);
+
+  setTimeout(() => {
+    makeClouds();
+    initFlight();
+    showScreen('screen-flight');
+    showNotif('🛫 이륙합니다!');
+    // Reset avatar styles for next use
+    avatarSvg.style.transition = 'none';
+    nameTag.style.transition = 'none';
+    avatarSvg.style.transform = '';
+    avatarSvg.style.opacity = '1';
+    nameTag.style.opacity = '1';
+    btn.disabled = false;
+  }, 1000);
+}
+
+// Clouds
+function makeClouds() {
+  const c = document.getElementById('flight-clouds');
+  c.innerHTML = '';
+  if (!document.getElementById('ckf')) {
+    const st = document.createElement('style');
+    st.id = 'ckf';
+    st.textContent = `
+      @keyframes dcL{from{transform:translateX(0)}to{transform:translateX(calc(100vw+220px))}}
+      @keyframes dcR{from{transform:translateX(0)}to{transform:translateX(calc(-100vw-220px))}}
+    `;
+    document.head.appendChild(st);
+  }
+  [{w:130,h:42,t:'18%',l:'-160px',d:22,del:0,dir:'L'},
+   {w:95,h:32,t:'30%',r:'-120px',d:27,del:6,dir:'R'},
+   {w:160,h:52,t:'14%',l:'-190px',d:34,del:13,dir:'L'},
+   {w:75,h:24,t:'26%',l:'-90px',d:19,del:9,dir:'L'}].forEach(cfg=>{
+    const el = document.createElement('div');
+    el.className = 'fcloud';
+    el.style.cssText = `width:${cfg.w}px;height:${cfg.h}px;top:${cfg.t};position:absolute;animation:dc${cfg.dir} ${cfg.d}s linear infinite ${cfg.del}s;opacity:0.75;`;
+    if(cfg.l) el.style.left=cfg.l; if(cfg.r) el.style.right=cfg.r;
+    const p1=document.createElement('div');
+    p1.style.cssText=`position:absolute;background:rgba(255,255,255,0.8);border-radius:50%;width:${cfg.w*0.5}px;height:${cfg.w*0.5}px;top:${-cfg.w*0.15}px;left:${cfg.w*0.15}px;`;
+    const p2=document.createElement('div');
+    p2.style.cssText=`position:absolute;background:rgba(255,255,255,0.8);border-radius:50%;width:${cfg.w*0.42}px;height:${cfg.w*0.42}px;top:${-cfg.w*0.1}px;left:${cfg.w*0.44}px;`;
+    el.appendChild(p1); el.appendChild(p2); c.appendChild(el);
+  });
+}
+
+// STEP 3: FLIGHT
+function initFlight() {
+  const fp = document.getElementById('fly-plane');
+  const W = window.innerWidth, H = window.innerHeight;
+
+  // Use fixed positioning — coordinates are viewport-relative
+  fp.style.position = 'fixed';
+  fp.style.opacity  = '1';
+  fp.style.display  = 'flex';
+
+  // Start: bottom-left, off-screen
+  let x = -60;
+  let y = H - 220;
+  let vx = 1, vy = 0;
+
+  let phase = 'taxi';
+  let frame = 0;
+  let letterDropped = false;
+
+  fp.style.left = x + 'px';
+  fp.style.top  = y + 'px';
+
+  clearInterval(exhaustTimer);
+  exhaustTimer = setInterval(() => {
+    const r = fp.getBoundingClientRect();
+    if (r.width === 0) return;
+    const dot = document.createElement('div');
+    dot.className = 'trail-dot';
+    const sz = 18 + Math.random() * 20;
+    const cx = r.left + r.width * 0.1;
+    const cy = r.top  + r.height * 0.52;
+    const colors = ['rgba(255,255,255,0.8)', 'rgba(200,220,255,0.7)', 'rgba(180,200,255,0.6)'];
+    dot.style.cssText = `width:${sz}px;height:${sz}px;left:${cx-sz/2}px;top:${cy-sz/2}px;background:${colors[Math.floor(Math.random()*3)]};`;
+    document.body.appendChild(dot);
+    setTimeout(() => dot.remove(), 2500);
+  }, 55);
+
+  function tick() {
+    frame++;
+
+    if (phase === 'taxi') {
+      // 천천히 출발 (약 1.5초)
+      vx = Math.min(vx + 0.035, 2.5);
+      vy = 0;
+      if (x > W * 0.18) { phase = 'takeoff'; frame = 0; }
+
+    } else if (phase === 'takeoff') {
+      // 이륙 — 서서히 코 들어올림
+      vx = Math.min(vx + 0.06, 4);
+      vy -= 0.09;
+      if (y < H * 0.62) { phase = 'climb'; frame = 0; }
+
+    } else if (phase === 'climb') {
+      // 상승하면서 조금씩 빨라짐
+      vx = Math.min(vx + 0.08, 6);
+      vy -= 0.07;
+      if (y < H * 0.3) { phase = 'cruise'; frame = 0; }
+
+    } else if (phase === 'cruise') {
+      // ★ 별명 감상 구간 — 180프레임(약 3초), 가속하며 통과
+      vx = Math.min(vx + 0.06, 10);  // 점점 빨라짐
+      vy *= 0.93;
+      if (frame > 180) { phase = 'soar'; frame = 0; }
+
+    } else if (phase === 'soar') {
+      // 쌩~~ 가속하며 하늘로 사라짐
+      vx = Math.min(vx * 1.06, 22);  // 급가속
+      vy -= 1.2;
+      if (!letterDropped && frame === 12) {
+        letterDropped = true;
+        dropFallingLetter(x + 60, y + 80);
+      }
+      if (y < -300) {
+        fp.style.opacity = '0';
+        clearInterval(exhaustTimer);
+        return;
+      }
+    }
+
+    x += vx;
+    y += vy;
+
+    const tilt = phase === 'soar'
+      ? -45
+      : Math.max(-30, Math.min(vy * -3, 5));
+
+    fp.style.left      = x + 'px';
+    fp.style.top       = y + 'px';
+    fp.style.transform = `translateX(-50%) rotate(${tilt}deg)`;
+
+    requestAnimationFrame(tick);
+  }
+
+  requestAnimationFrame(tick);
+}
+
+// Animated letter falling from sky, then reveal full letter card
+function dropFallingLetter(planeX, planeY) {
+  const el = document.getElementById('falling-letter');
+  el.style.display = 'block';
+  el.style.width   = '130px';
+  el.style.height  = '100px';
+
+  // Start from plane's current position
+  const startX = Math.min(Math.max(planeX - 65, 20), window.innerWidth - 150);
+  const startY = Math.max(planeY, 0);
+
+  el.style.left      = startX + 'px';
+  el.style.top       = startY + 'px';
+  el.style.opacity   = '0';
+  el.style.transform = 'rotate(-15deg) scale(0.6)';
+  el.style.transition = 'none';
+
+  // Pop in
+  requestAnimationFrame(()=>{
+    el.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+    el.style.opacity    = '1';
+    el.style.transform  = 'rotate(-12deg) scale(1)';
+  });
+
+  let fy   = startY;
+  let fx   = startX;
+  let velY = 0;
+  let velX = -0.5;   // slight leftward drift
+  let rot  = -12;
+  let frameN = 0;
+  const targetY = window.innerHeight * 0.42;
+
+  // Short delay then start falling
+  setTimeout(()=>{
+    function fall() {
+      frameN++;
+      velY += 0.38;              // gentle gravity
+      velX *= 0.98;              // drift fades
+      rot = -12 + Math.sin(frameN * 0.1) * 18;  // gentle wobble
+      fy += velY;
+      fx += velX;
+
+      el.style.top       = fy + 'px';
+      el.style.left      = fx + 'px';
+      el.style.transform = `rotate(${rot}deg)`;
+
+      if (fy < targetY) {
+        requestAnimationFrame(fall);
+      } else {
+        // Soft landing bounce
+        el.style.transition = 'transform 0.4s cubic-bezier(0.34,1.56,0.64,1)';
+        el.style.transform  = 'rotate(-3deg) scale(1.1)';
+        setTimeout(()=>{
+          el.style.transform = 'rotate(0deg) scale(1)';
+        }, 250);
+
+        // Hold briefly, then bloom into letter card
+        setTimeout(()=>{
+          el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+          el.style.opacity    = '0';
+          el.style.transform  = 'rotate(0deg) scale(1.4)';
+          setTimeout(()=>{
+            el.style.display = 'none';
+            document.getElementById('letter-wrap').style.display = 'flex';
+            showNotif('💌 편지가 도착했어요!', 3500);
+          }, 520);
+        }, 1100);
+      }
+    }
+    requestAnimationFrame(fall);
+  }, 200);
+}
+
+// Nickname API
+async function generateNickname(name, relation, complaint) {
+  const resp = await fetch('/api/proxy',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:100,
+      messages:[{
+        role:'user',
+        content:`다음 사람에게 재치 있는 별명을 지어주세요.
+관계: ${relation}
+단점: "${complaint}"
+조건: 한국어, 5~10자, 위트있게, 너무 공격적이지 않게, 별명만 반환 (다른 말 없이)`
+      }]
+    })
+  });
+  const data=await resp.json();
+  return data.content[0].text.trim().replace(/["']/g,'').replace(/그\s*분/g, '그 사람');
+}
+
+// Letter API
+async function generateLetter(name, relation, complaint) {
+  const resp = await fetch('/api/proxy',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:400,
+      messages:[{
+        role:'user',
+        content:`편지 작가입니다. 딱 2문장으로만 씁니다.
+
+나와의 관계: ${relation}
+그 사람의 단점: "${complaint}"
+
+아래 구조로 써주세요:
+1문장 (느슨한 위트): ${relation} 관계 맥락에서, 이 단점이 의도치 않게 어떤 역할을 했는지 가볍고 유머러스하게. 억지 인과 없이, 살짝 엉뚱하게.
+2문장 (짧은 재해석): 그 단점을 그 사람만의 방식으로 짧고 따뜻하게 마무리. 여운이 남게.
+
+조건:
+- 2문장만
+- 설교나 교훈 금지
+- 너무 진지하지도, 너무 가볍지도 않게
+- "그 분" 대신 "그 사람"
+- 존댓말, 텍스트만 반환`
+      }]
+    })
+  });
+  const data=await resp.json();
+  const raw=data.content[0].text;
+  return raw.replace(/```[a-z]*|```/g,'').trim().replace(/그\s*분/g, '그 사람');
+}
+
+function resetAll(){
+  clearInterval(exhaustTimer);
+  document.querySelectorAll('.trail-dot').forEach(d=>d.remove());
+  document.getElementById('letter-wrap').style.display='none';
+  const fl = document.getElementById('falling-letter');
+  fl.style.display='none'; fl.style.opacity='1';
+  document.getElementById('person-name').value='';
+  document.getElementById('relation').value='';
+  document.getElementById('complaint').value='';
+  document.getElementById('send-btn').disabled=false;
+  const fp=document.getElementById('fly-plane');
+  fp.style.left=''; fp.style.top=''; fp.style.transform=''; fp.style.opacity='1';
+  showScreen('screen-input');
+}
+</script>
+</body>
+</html>
