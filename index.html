@@ -56,6 +56,28 @@ select.inp option { background:#1a3a6b; color:#fff; }
 .board-btn:hover { transform:translateY(-2px); }
 .board-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
 
+/* ===== PC 반응형 ===== */
+@media (min-width: 768px) {
+  .input-wrap { max-width: 560px; }
+  .main-title { font-size: 2.8rem; }
+  .main-sub { font-size: 1rem; margin-bottom: 32px; }
+  .card { padding: 40px 48px; border-radius: 28px; }
+  .inp { padding: 14px 20px; font-size: 1.05rem; }
+  textarea.inp { height: 130px; }
+  .send-btn { padding: 17px; font-size: 1.1rem; }
+
+  /* 탑승 화면 — PC에서 좌우 균형 */
+  .gate-side { padding: 60px 40px; }
+  .plane-side { padding: 60px 40px; }
+  .plane-big { font-size: 13rem; }
+  .avatar-svg { width: 200px; height: 360px; }
+  .person-stage { width: 260px; height: 400px; }
+
+  /* 편지 카드 */
+  .letter-card { padding: 50px 56px; }
+  .letter-body { font-size: 1.15rem; }
+}
+
 /* ===== SCREEN 3: FLIGHT ===== */
 #screen-flight { background:linear-gradient(to bottom,#0a1628 0%,#1a3a6b 40%,#4a7fb5 70%,#f4a460 88%,#e8783a 100%); position:relative; overflow:hidden; }
 .ground { position:absolute; bottom:0; width:100%; height:70px; background:linear-gradient(to bottom,#4a7c59,#2d5a27); z-index:2; }
